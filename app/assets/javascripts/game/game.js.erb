@@ -1,0 +1,34 @@
+var game = new Phaser.Game(800,600, Phaser.auto, '', { preload: preload, create: create, update: update });
+var asteroids
+var explosions
+var playerShip
+function preload(){
+  game.load.image('shipImg', "<%= asset_path('shmup-ship.png') %>")
+  game.load.image('asteroid1', "<%= asset_path('asteroid1.png') %>")
+  game.load.spritesheet('explosion', "<%= asset_path('explode.png') %>", 128, 128)
+};
+
+function create(){
+  playerShip = new Ship();
+
+  asteroids = game.add.group();
+  asteroid = asteroids.create(0,0,'asteroid1')
+  game.physics.arcade.enable(asteroid)
+  asteroid.body.velocity.x = 100
+
+  explosions = game.add.group();
+  explosions.createMultiple(30, 'explosion');
+  explosions.forEach(initBoom, this);
+
+  function initBoom(boom){
+    boom.anchor.x = 0.5;
+    boom.anchor.y = 0.5;
+    boom.animations.add('explosion');
+  }
+};
+
+function update(){
+  playerShip.update()
+  game.world.wrap(asteroid)
+  game.physics.arcade.collide(playerShip.ship, asteroids, playerShip.explode.bind(playerShip))
+};
