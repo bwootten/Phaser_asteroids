@@ -2,10 +2,12 @@ var game = new Phaser.Game(800,600, Phaser.auto, '', { preload: preload, create:
 var asteroids
 var explosions
 var playerShip
+
 function preload(){
   game.load.image('shipImg', "<%= asset_path('shmup-ship.png') %>")
   game.load.image('asteroid1', "<%= asset_path('asteroid1.png') %>")
   game.load.spritesheet('explosion', "<%= asset_path('explode.png') %>", 128, 128)
+  game.load.image('bullet', "<%= asset_path('bullets.png') %>")
 };
 
 function create(){
