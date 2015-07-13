@@ -1,22 +1,28 @@
-var game = new Phaser.Game(800,600, Phaser.auto, '', { preload: preload, create: create, update: update });
+var game = new Phaser.Game(800,600, Phaser.auto, 'game', { preload: preload, create: create, update: update });
 var asteroids
 var explosions
 var playerShip
+var scoreDisplay
 
 function preload(){
   game.load.image('shipImg', "<%= asset_path('shmup-ship.png') %>")
   game.load.image('asteroid1', "<%= asset_path('asteroid1.png') %>")
+  game.load.image('asteroid2', "<%= asset_path('asteroid2.png') %>")
+  game.load.image('asteroid3', "<%= asset_path('asteroid3.png') %>")
   game.load.spritesheet('explosion', "<%= asset_path('explode.png') %>", 128, 128)
   game.load.image('bullet', "<%= asset_path('bullets.png') %>")
+  game.load.image('starfield', "<%= asset_path('starfield.png') %>")
 };
 
 function create(){
+  starfield = game.add.tileSprite(0,0, 800,600, 'starfield')
+
   playerShip = new Ship();
 
   asteroids = game.add.group();
-  asteroid = asteroids.create(0,0,'asteroid1')
-  game.physics.arcade.enable(asteroid)
-  asteroid.body.velocity.x = 100
+  asteroids.enableBody = true
+  asteroids.physicsBodyType = Phaser.Physics.ARCADE
+  buildAsteroids()
 
   explosions = game.add.group();
   explosions.createMultiple(30, 'explosion');
@@ -27,10 +33,61 @@ function create(){
     boom.anchor.y = 0.5;
     boom.animations.add('explosion');
   }
+
+  scoreDisplay = game.add.text(10,10, 'Score: ' + playerShip.score, {font: '12pt Arial', fill: 'white'})
 };
 
 function update(){
+  starfield.tilePosition.x -= 0.005 * playerShip.ship.body.velocity.x
+  starfield.tilePosition.y -= 0.005 * playerShip.ship.body.velocity.y
+
+
   playerShip.update()
-  game.world.wrap(asteroid)
+  for(var i = 0; i < asteroids.length; i++){
+    game.world.wrap(asteroids.children[i])
+  }
   game.physics.arcade.collide(playerShip.ship, asteroids, playerShip.explode.bind(playerShip))
+  game.physics.arcade.overlap(playerShip.bullets, asteroids, bulletHitsAsteroid)
+  // game.physics.arcade.collide(playerShip.bullets, asteroids, )
 };
+
+function buildAsteroids(){
+  for(var i = 0; i < 6; i++){
+    var randPosAngle = 2 * Math.PI * Math.random();
+    var xpos = playerShip.ship.body.x + 240 * Math.sin(randPosAngle);
+    var ypos = playerShip.ship.body.y + 160 * Math.cos(randPosAngle);
+    var randVelAngle = randPosAngle + (3/2) * Math.PI * (Math.random() - 0.5);
+    var xvelocity = 20 * Math.sin(randVelAngle);
+    var yvelocity = 20 * Math.cos(randVelAngle);
+    var asteroid = asteroids.create(xpos,ypos, 'asteroid1');
+    asteroid.anchor.setTo(0.5, 0.5);
+    asteroid.scale.setTo(4,4);
+    asteroid.body.velocity.setTo(xvelocity, yvelocity);
+    asteroid.body.angularVelocity = 10 * (Math.random() * 2 - 1);
+    asteroid.hp = 3;
+  }
+}
+
+function bulletHitsAsteroid(bullet, asteroid){
+  var explosion = explosions.getFirstExists(false);
+  explosion.reset(bullet.body.x, bullet.body.y)
+  explosion.scale.setTo(0.4,0.4)
+  explosion.play('explosion', 30, false, true)
+  bullet.kill();
+
+  asteroid.hp -= 1;
+  if (asteroid.hp < 1){
+    playerShip.score += 10;
+    scoreDisplay.text = 'Score: ' + playerShip.score
+    asteroid.kill();
+    if (asteroids.countLiving() == 0){
+      respawnAsteroids()
+    }
+  };
+};
+
+function respawnAsteroids(){
+  for(var i = 0; i < asteroids.children.length; i++){
+    
+  }
+}

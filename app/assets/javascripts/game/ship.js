@@ -4,6 +4,7 @@ function Ship(){
   this.fireButton = game.input.keyboard.addKey(Phaser.Keyboard.S);
   this.bullets = game.add.group();
   this.ship.cooldown = 0;
+  this.score = 0;
   this.initialize();
 }
 
@@ -65,5 +66,6 @@ Ship.prototype.explode = function(){
 
   var explosion = explosions.getFirstExists(false);
   explosion.reset(thisShip.body.x, thisShip.body.y);
+  explosion.scale.setTo(1,1)
   explosion.play('explosion', 30, false, true)
 }
