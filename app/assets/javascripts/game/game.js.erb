@@ -19,13 +19,14 @@ function create(){
   starfield = game.add.tileSprite(0,0, 800,600, 'starfield')
 
   playerShip = new Ship();
+  
+  waveNumber = 1;
 
   asteroids = game.add.group();
   asteroids.enableBody = true
   asteroids.physicsBodyType = Phaser.Physics.ARCADE
   buildAsteroids(6)
 
-  waveNumber = 1;
 
   explosions = game.add.group();
   explosions.createMultiple(30, 'explosion');
