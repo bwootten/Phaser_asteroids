@@ -23,7 +23,7 @@ function create(){
   asteroids = game.add.group();
   asteroids.enableBody = true
   asteroids.physicsBodyType = Phaser.Physics.ARCADE
-  buildAsteroids()
+  buildAsteroids(6)
 
   waveNumber = 1;
 
@@ -54,14 +54,14 @@ function update(){
   // game.physics.arcade.collide(playerShip.bullets, asteroids, )
 };
 
-function buildAsteroids(){
-  for(var i = 0; i < 6; i++){
+function buildAsteroids(num_asteroids){
+  for(var i = 0; i < num_asteroids; i++){
     var randPosAngle = 2 * Math.PI * Math.random();
     var xpos = playerShip.ship.body.x + 240 * Math.sin(randPosAngle);
     var ypos = playerShip.ship.body.y + 160 * Math.cos(randPosAngle);
     var randVelAngle = randPosAngle + (3/2) * Math.PI * (Math.random() - 0.5);
-    var xvelocity = 20 * Math.sin(randVelAngle);
-    var yvelocity = 20 * Math.cos(randVelAngle);
+    var xvelocity = 20 * waveNumber * Math.sin(randVelAngle);
+    var yvelocity = 20 * waveNumber * Math.cos(randVelAngle);
     var asteroid = asteroids.create(xpos,ypos, 'asteroid1');
     asteroid.anchor.setTo(0.5, 0.5);
     asteroid.scale.setTo(4,4);
@@ -91,9 +91,36 @@ function bulletHitsAsteroid(bullet, asteroid){
 
 function respawnAsteroids(){
   waveNumber += 1;
+
   for(var i = 0; i < asteroids.children.length; i++){
+    var randPosAngle = 2 * Math.PI * Math.random();
+    var xpos = playerShip.ship.body.x + 240 * Math.sin(randPosAngle);
+    var ypos = playerShip.ship.body.y + 160 * Math.cos(randPosAngle);
+    var randVelAngle = randPosAngle + (3/2) * Math.PI * (Math.random() - 0.5);
+    var xvelocity = 20 * Math.sin(randVelAngle) * waveNumber;
+    var yvelocity = 20 * Math.cos(randVelAngle) * waveNumber;
+
+    if (xpos < 0){
+      xpos += 800
+    }
+
+    if (ypos < 0){
+      ypos += 600
+    }
+    if (xpos > 800){
+      xpos -= 800
+    }
+
+    if (ypos > 600){
+      ypos -= 600
+    }
+
     asteroid = asteroids.children[i]
     asteroid.hp = 3
     asteroid.revive()
+    asteroid.body.position.setTo(xpos,ypos)
+    asteroid.body.velocity.setTo(xvelocity,yvelocity)
   }
+
+  buildAsteroids(1)
 }
